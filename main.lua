@@ -789,11 +789,13 @@ xpcall(function()
 
 	Connect("CommandDetectionOldChat", Player.Chatted:Connect(ChattedConnection))
 	
+	--[[
 	Connect("CommandDetectionNewChat", TextChatService.SendingMessage:Connect(function(Data)
 		if typeof(Data.Text) ~= "string" then return end
 
 		ChattedConnection(Data.Text)
 	end))
+	]]
 	
 	Notify("INITIALIZED ALL", "The asset grabber was initialized successfully")
 	warn("LOADED DEEPWOKEN ASSET GRABBER SUCCESSFULLY")
