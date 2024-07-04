@@ -313,7 +313,7 @@ xpcall(function()
 		for i, property in pairs(properties)do
 			property = property.Name
 			if (defaults[property] ~= nil and Object[property] == defaults[property]) or ShouldntSave(data, property) then continue end
-
+			if property == "Scale" and Object.ClassName == "Model" then continue end
 			if typeof(data[property]) == "Instance" or (Object:IsA("Model") and property == "CFrame") then continue end
 
 			xpcall(function()
@@ -638,7 +638,12 @@ xpcall(function()
 			Notify("STORING...", `Storing target character this could take a while. DONT DO ANY OTHER ACTIONS.`)
 
 			if TargettingCharacter then
-				StoreObject(TargettingCharacter, CharacterFolder)
+				local Model = Instance.new("Model", CharacterFolder)
+				Model.Name = TargettingCharacter.Name
+				
+				for _, Part in TargettingCharacter:GetChildren() do
+					Part:Clone().Parent = Model
+				end
 			end
 
 			Notify("STORED", `Successfully stored target character!`)
