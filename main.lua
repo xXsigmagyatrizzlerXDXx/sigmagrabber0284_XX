@@ -521,7 +521,11 @@ xpcall(function()
 				local Attachment = Object:Clone()
 				Attachment.Parent = Part
 				Attachment.CFrame = CFrame.new()
-			else
+			elseif Object.ClassName == "Sound" then
+				local Sound = Object:Clone()
+				Sound.Parent = Location
+				Sound:Stop()
+ 			else
 				Object:Clone().Parent = Location
 			end
 
