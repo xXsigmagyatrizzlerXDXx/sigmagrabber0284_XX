@@ -66,8 +66,8 @@ xpcall(function()
 		ModelsCache = {}
 	}
 
-	local IgnorableObjects = {"WindTrail", "NewDirt", "WaterImpact", "Footprint"}
-	local UnnededClasses = {"Script", "ModuleScript", "LocalScript", "SpecialMesh", "CylinderMesh"}
+	local IgnorableObjects = {"WindTrail", "NewDirt", "WaterImpact", "Footprint", "Part"}
+	local UnnededClasses = {"Script", "ModuleScript", "LocalScript", "SpecialMesh", "CylinderMesh", "UnionOperation"}
 	
 	local MobNames = {
 		".bountyhunter", 
@@ -89,14 +89,6 @@ xpcall(function()
 		};
 
 		["Part"] = {
-			"Name";
-			"Size";
-			"Color";
-			"Material";
-			"Transparency";
-		};
-		
-		["UnionOperation"] = {
 			"Name";
 			"Size";
 			"Color";
@@ -147,7 +139,9 @@ xpcall(function()
 		"Grip",
 		"Origin",
 		"PrimaryPart",
-		"UniqueId"
+		"UniqueId",
+		"PivotOffset";
+		"Pivot Offset";
 	}
 
 	local DontSaveIf = {
@@ -461,7 +455,7 @@ xpcall(function()
 	
 	local function StoreObject(Object, Location)
 		xpcall(function()
-			if Object == nil or (Object and Object.Parent == nil) then return end
+			if Object == nil or (Object ~= nil and Object.Parent == nil) then return end
 			
 			if table.find(IgnorableObjects, Object.Name) or table.find(UnnededClasses, Object.ClassName) then return end
 
@@ -469,7 +463,7 @@ xpcall(function()
 
 			task.wait(getgenv()["AddYield"])
 
-			if Object == nil or (Object and Object.Parent ~= OriginalParent) then return end
+			if Object == nil or (Object ~= nil and Object.Parent ~= nil and Object.Parent ~= OriginalParent) then return end
 			if Object.ClassName == "Model" then 
 				if #Object:GetChildren() <= 0 then return end
 				
@@ -479,7 +473,7 @@ xpcall(function()
 					for _, MobName in MobNames do
 						local FindOperation = string.find(Object.Name, MobName)
 						
-						if FindOperation ~= nil and FindOperation <= 1 or FindOperation == string.len(MobName) then
+						if FindOperation ~= nil and tonumber(FindOperation) ~= nil and FindOperation <= 1 or FindOperation == string.len(MobName) then
 							IsAMob = true
 							break
 						end
@@ -795,13 +789,11 @@ xpcall(function()
 
 	Connect("CommandDetectionOldChat", Player.Chatted:Connect(ChattedConnection))
 	
-	--[[
 	Connect("CommandDetectionNewChat", TextChatService.SendingMessage:Connect(function(Data)
 		if typeof(Data.Text) ~= "string" then return end
 
 		ChattedConnection(Data.Text)
 	end))
-	]]
 	
 	Notify("INITIALIZED ALL", "The asset grabber was initialized successfully")
 	warn("LOADED DEEPWOKEN ASSET GRABBER SUCCESSFULLY")
