@@ -352,10 +352,16 @@ xpcall(function()
 		local Data; 
 		
 		xpcall(function()
+			Notify("CONVERTING DATA", "Refrain from doing any action.", 5)
+			
 			local Data = tostring(Converter:ConvertToSaveable(Object, true))
 			
 			xpcall(function()
-				writefile(Name, Data)
+				Notify("DATA CONVERTED", "Refrain from doing any action.", 5)
+				
+				writefile(`{Name}.txt`, Data)
+				
+				Notify("FILE SAVED", `You can find the save at "workspace/{Name}", you can resume now.`, 5)
 			end, function(err)
 				Notify("FAILED TO SAVE OBJECT", tostring(err), 5)
 			end)
@@ -735,24 +741,16 @@ xpcall(function()
 			SaveAnimations(TargettingCharacter)
 		elseif IO.KeyCode == Enum.KeyCode.M then
 			Notify("SAVING INSTANCE", "This could take a while depending on what your saving, refrain from doing any actions.", 5)
-
-			local Name = `SAVE_{getgenv()["SaveCount"]}.txt`
-
-			Notify("DATA CONVERTED", "Saving...", 5)
-
+			
 			xpcall(function()
-				SaveObjectToFile(Folder, Name)
+				SaveObjectToFile(Folder, `SAVE_{getgenv()["SaveCount"]}`)
 
 				--saveinstance(Name, Folder)
 				--saveinstance({Folder}, {FileName = Name, IgnoreArchivable = true, DisableCompression = true})
 
 				--warn(Data)
 
-				Notify("FILE WRITTEN", "thing", 5)
-
 				getgenv()["SaveCount"] = getgenv()["SaveCount"] + 1
-
-				Notify("SAVED INSTANCE", `File is saved in "workspace/{Name}"`, 5)
 			end, function(err)
 				warn(`FAILED TO SAVE: {err}`)
 
