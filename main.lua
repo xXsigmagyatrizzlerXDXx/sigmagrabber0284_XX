@@ -662,6 +662,8 @@ xpcall(function()
 
 			if TargettingCharacter then
 				SaveObjectToFile(TargettingCharacter, `CHARSAVE_{TargettingCharacter.Name}_{getgenv()["CharacterSaves"]}`)
+				
+				getgenv()["CharacterSaves"] = getgenv()["CharacterSaves"] + 1
 			end
 			
 			Notify("STORED", `Successfully stored target character!`)
