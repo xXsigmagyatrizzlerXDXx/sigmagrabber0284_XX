@@ -66,6 +66,62 @@ xpcall(function()
 		ModelsCache = {}
 	}
 
+	local IgnorableObjects = {"WindTrail", "NewDirt", "WaterImpact", "Footprint"}
+	local UnnededClasses = {"Script", "ModuleScript", "LocalScript"}
+	
+	local MobNames = {
+		".bountyhunter", 
+		".golem", 
+		".megalodaunt", 
+		".pirate_black", 
+		".mudskipper", 
+		".bandit", 
+		".banditleader", 
+		".deepknight", 
+		".dukecultist", 
+		".brainsuckerduke", 
+		".thief"
+	}
+	
+	local CloneDetectionClasses = {
+		["Sound"] = {
+			"SoundId";
+		};
+
+		["Part"] = {
+			"Name";
+			"Size";
+			"Color";
+			"Material";
+			"Transparency";
+		};
+
+		["MeshPart"] = {
+			"Name";
+			"MeshId";
+			"Size";
+		};
+
+		["Weld"] = {
+			"Part1";
+			"Part0";
+			"C0";
+			"C1";
+		};
+
+		["Motor6D"] = {
+			"Part1";
+			"Part0";
+			"C0";
+			"C1";
+		};
+
+		["ValueBase"] = {
+			"Name";
+			"Value";
+		};
+	}
+	
 	local DontSave = {
 		'Parent',
 		'BrickColor',
@@ -335,7 +391,8 @@ xpcall(function()
 	local TargettingCharacter;
 
 	local CharacterSearchEnabled, ThrownSearchEnabled = true, true;
-
+	local DupeRemovalEnabled, MobRemovalEnabled = true, true;
+	
 	local function SaveAnimations(Target)
 		xpcall(function()
 			if AnimationsFolder and Target ~= nil and Target:FindFirstChildOfClass("Humanoid") then
@@ -355,14 +412,41 @@ xpcall(function()
 			warn(`RANDOM ANIMATON SAVING ERROR: {err}`)
 		end)
 	end
-
+	
+	local function AnyObjectWithPropertysLike(Class, SecondaryObject, PropertiesToCheck, Location)
+		local Result = false
+		
+		xpcall(function()
+			for _, Object in Location:GetDescendants() do
+				if Object:IsA(Class) then
+					local SameOnes = 0
+					
+					for _, PropertyName in PropertiesToCheck do
+						if Object[PropertyName] == SecondaryObject[PropertyName] then
+							SameOnes += 1
+						end
+					end
+					
+					if SameOnes >= #PropertiesToCheck then
+						Result = true
+						
+						break
+					end
+				end
+			end
+			
+			return Result
+		end, function(err)
+			warn(`FAILED TO CHECK IF DUPLICATE OBJECT "{SecondaryObject}:{Class}": {err}`)
+		end)
+		
+		return Result
+	end
+	
 	local function StoreObject(Object, Location)
 		xpcall(function()
 			if Object == nil or (Object and Object.Parent == nil) then return end
-
-			local IgnorableObjects = {"WindTrail", "NewDirt", "WaterImpact", "Footprint"}
-			local UnnededClasses = {"Script", "ModuleScript", "LocalScript"}
-
+			
 			if table.find(IgnorableObjects, Object.Name) or table.find(UnnededClasses, Object.ClassName) then return end
 
 			local OriginalParent = Object.Parent
@@ -370,8 +454,43 @@ xpcall(function()
 			task.wait(getgenv()["AddYield"])
 
 			if Object == nil or (Object and Object.Parent ~= OriginalParent) then return end
-			if Object.ClassName == "Model" and #Object:GetChildren() <= 0 then return end
-
+			if Object.ClassName == "Model" then 
+				if #Object:GetChildren() <= 0 then return end
+				
+				if MobRemovalEnabled then
+					local IsAMob = false
+					
+					for _, MobName in MobNames do
+						local FindOperation = string.find(Object.Name, MobName)
+						
+						if FindOperation <= 1 or FindOperation == string.len(MobName) then
+							IsAMob = true
+							break
+						end
+					end
+					
+					if IsAMob then return end
+				end
+			end
+			
+			if DupeRemovalEnabled then
+				local Proceed = true
+				
+				for Class, CloneData in CloneDetectionClasses do
+					if Object:IsA(Class) then
+						if AnyObjectWithPropertysLike(Class, Object, CloneData, Location) then
+							Proceed = false
+							break
+						end
+					end
+				end
+				
+				if not Proceed then
+					warn(`PREVENTED DUPLICATE INSTANCE: "{Object.Name}:{Object.ClassName}"`)
+					return
+				end
+			end
+			
 			if Object.ClassName == "Attachment" then
 				local Part = Instance.new("Part", Location)
 				Part.Name = `{Object.Name}_ATTACHMENT_HOLDER`
@@ -382,9 +501,10 @@ xpcall(function()
 				Part.CanTouch = false
 				Part.CanQuery = false
 				Part.Size = Vector3.new(1, 1, 1)
-
+				
 				local Attachment = Object:Clone()
 				Attachment.Parent = Part
+				Attachment.CFrame = CFrame.new()
 			else
 				Object:Clone().Parent = Location
 			end
@@ -393,7 +513,7 @@ xpcall(function()
 				SaveAnimations(Object.Parent)
 			end
 
-			print(`Added: {Object.Name}; Class: {Object.ClassName}`)
+			print(`ADDED INSTANCE {Object.Name}:{Object.ClassName}`)
 		end, function(err)
 			warn(`ERROR SAVING INSTANCE "{(Object and Object.Name) or nil}": "{err}"`)
 		end)
@@ -532,18 +652,30 @@ xpcall(function()
 			end
 
 			Notify("STORED", `Successfully stored the map!`)
-		end,
+		end;
 
+		["dupetoggle"] = function(args)
+			DupeRemovalEnabled = not DupeRemovalEnabled
+
+			Notify("DUPE FILTERING TOGGLED", `State: {DupeRemovalEnabled}`)
+		end;
+		
+		["mobtoggle"] = function(args)
+			MobRemovalEnabled = not MobRemovalEnabled
+
+			Notify("DUPE FILTERING TOGGLED", `State: {DupeRemovalEnabled}`)
+		end;
+		
 		["chartoggle"] = function(args)
 			CharacterSearchEnabled = not CharacterSearchEnabled
 
-			Notify("CHARACTER SEARCH ENABLED", `State: {CharacterSearchEnabled}`)
+			Notify("CHARACTER SEARCH TOGGLED", `State: {CharacterSearchEnabled}`)
 		end;
 
 		["throwntoggle"] = function(args)
 			ThrownSearchEnabled = not ThrownSearchEnabled
 
-			Notify("THROWN SEARCH ENABLED", `State: {ThrownSearchEnabled}`)
+			Notify("THROWN SEARCH TOGGLED", `State: {ThrownSearchEnabled}`)
 		end;
 	}
 
