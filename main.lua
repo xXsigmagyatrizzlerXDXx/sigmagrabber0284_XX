@@ -642,7 +642,11 @@ xpcall(function()
 				Model.Name = TargettingCharacter.Name
 				
 				for _, Part in TargettingCharacter:GetChildren() do
-					Part:Clone().Parent = Model
+					xpcall(function()
+						Part:Clone().Parent = Model
+					end, function(err)
+						warn(`FAILED TO STORE CHARACTER PART: {err}`)
+					end)
 				end
 			end
 
