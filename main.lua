@@ -348,6 +348,22 @@ xpcall(function()
 		return HTTPService:JSONEncode(data)
 	end
 
+	local function SaveObjectToFile(Object, Name)
+		local Data; 
+		
+		xpcall(function()
+			local Data = tostring(Converter:ConvertToSaveable(Object, true))
+			
+			xpcall(function()
+				writefile(Name, Data)
+			end, function(err)
+				Notify("FAILED TO SAVE OBJECT", tostring(err), 5)
+			end)
+		end, function(err)
+			Notify("FAILED TO CONVERT OBJECT", tostring(err), 5)
+		end)
+	end
+	
 	Notify("API INITIALIZED", "Beginning next step", 2)
 
 	getgenv()["SessionId"] = getgenv()["SessionId"] or HTTPService:GenerateGUID(false)
@@ -361,7 +377,8 @@ xpcall(function()
 
 	getgenv()["Connections"] = {}
 	getgenv()["SaveCount"] = getgenv()["SaveCount"] or 0
-
+	getgenv()["CharacterSaves"] = getgenv()["CharacterSaves"] or 0
+	
 	if getgenv()["Folder"] then
 		getgenv().Folder:Destroy()
 	end
@@ -635,21 +652,12 @@ xpcall(function()
 		end,
 
 		["storechar"] = function(args)
-			Notify("STORING...", `Storing target character this could take a while. DONT DO ANY OTHER ACTIONS.`)
+			Notify("SAVING...", `Storing target character this could take a while. DONT DO ANY OTHER ACTIONS.`)
 
 			if TargettingCharacter then
-				local Model = Instance.new("Model", CharacterFolder)
-				Model.Name = TargettingCharacter.Name
-				
-				for _, Part in TargettingCharacter:GetChildren() do
-					xpcall(function()
-						Part:Clone().Parent = Model
-					end, function(err)
-						warn(`FAILED TO STORE CHARACTER PART: {err}`)
-					end)
-				end
+				SaveObjectToFile(TargettingCharacter, `CHARSAVE_{TargettingCharacter.Name}_{getgenv()["CharacterSaves"]}`)
 			end
-
+			
 			Notify("STORED", `Successfully stored target character!`)
 		end;
 
@@ -671,7 +679,9 @@ xpcall(function()
 			WorkspaceStorage:ClearAllChildren()
 
 			for _, Object in workspace:GetChildren() do
-				StoreObject(Object, WorkspaceStorage)
+				if Object.Name ~= "Living" and Object.Name ~= "Thrown" then
+					StoreObject(Object, WorkspaceStorage)
+				end
 			end
 
 			Notify("STORED", `Successfully stored the map!`)
@@ -728,12 +738,10 @@ xpcall(function()
 
 			local Name = `SAVE_{getgenv()["SaveCount"]}.txt`
 
-			local Data = tostring(Converter:ConvertToSaveable(Folder, true))
-
 			Notify("DATA CONVERTED", "Saving...", 5)
 
 			xpcall(function()
-				writefile(Name, Data)
+				SaveObjectToFile(Folder, Name)
 
 				--saveinstance(Name, Folder)
 				--saveinstance({Folder}, {FileName = Name, IgnoreArchivable = true, DisableCompression = true})
