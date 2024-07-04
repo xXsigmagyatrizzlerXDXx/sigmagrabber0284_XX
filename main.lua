@@ -67,7 +67,7 @@ xpcall(function()
 	}
 
 	local IgnorableObjects = {"WindTrail", "NewDirt", "WaterImpact", "Footprint"}
-	local UnnededClasses = {"Script", "ModuleScript", "LocalScript"}
+	local UnnededClasses = {"Script", "ModuleScript", "LocalScript", "SpecialMesh", "CylinderMesh"}
 	
 	local MobNames = {
 		".bountyhunter", 
@@ -94,6 +94,22 @@ xpcall(function()
 			"Color";
 			"Material";
 			"Transparency";
+		};
+		
+		["UnionOperation"] = {
+			"Name";
+			"Size";
+			"Color";
+			"Material";
+			"Transparency";
+		};
+		
+		["Highlight"] = {
+			"FillColor";
+			"OutlineColor";
+			"FillTransparency";
+			"OutlineTransparency";
+			"DepthMode";
 		};
 
 		["MeshPart"] = {
