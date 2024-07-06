@@ -502,7 +502,7 @@ xpcall(function()
 					for _, MobName in MobNames do
 						local FindOperation = string.find(Object.Name, MobName)
 						
-						if FindOperation ~= nil and tonumber(FindOperation) ~= nil and FindOperation <= 1 or FindOperation == string.len(MobName) then
+						if FindOperation ~= nil and tonumber(FindOperation) ~= nil and (FindOperation <= 1 or FindOperation == string.len(MobName)) then
 							IsAMob = true
 							break
 						end
