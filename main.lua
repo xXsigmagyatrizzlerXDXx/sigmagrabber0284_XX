@@ -516,9 +516,11 @@ xpcall(function()
 					
 					for _, Track in Object:FindFirstChildOfClass("Humanoid"):GetPlayingAnimationTracks() do
 						pcall(function()
-							Track:Stop()
+							Track:Stop(0)
 						end)
 					end
+					
+					task.wait(0.1)
 				end
 			end
 			
