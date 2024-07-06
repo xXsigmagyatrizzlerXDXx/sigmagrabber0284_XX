@@ -173,7 +173,7 @@ xpcall(function()
 			end
 		end
 		
-		if not DontSaveIf[property] or disallow then return true end
+		if not DontSaveIf[property] or disallow then return false end
 
 		for i, prop in pairs(DontSaveIf[property])do
 			if properties[prop] then
