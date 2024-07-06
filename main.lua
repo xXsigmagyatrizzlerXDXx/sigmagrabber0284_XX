@@ -168,7 +168,9 @@ xpcall(function()
 			disallow = not table.find(DontSave[property], objectClass)
 		end
 		
-		if not DontSaveIf[property] or disallow then return disallow end
+		if not DontSaveIf[property] or disallow then 
+			return disallow
+		end
 
 		for i, prop in pairs(DontSaveIf[property])do
 			if properties[prop] then
@@ -679,6 +681,16 @@ xpcall(function()
 			Notify("SAVING...", `Storing target character this could take a while. DONT DO ANY OTHER ACTIONS.`)
 
 			if TargettingCharacter then
+				if TargettingCharacter:FindFirstChildOfClass("Humanoid") then
+					for _, Track in TargettingCharacter:FindFirstChildOfClass("Humanoid"):GetPlayingAnimationTracks() do
+						pcall(function()
+							Track:Stop(0)
+						end)
+					end
+				end
+				
+				task.wait(0.1)
+				
 				SaveObjectToFile(TargettingCharacter, `CHARSAVE_{TargettingCharacter.Name}_{getgenv()["CharacterSaves"]}`)
 				
 				getgenv()["CharacterSaves"] = getgenv()["CharacterSaves"] + 1
