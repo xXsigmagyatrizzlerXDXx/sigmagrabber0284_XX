@@ -141,6 +141,8 @@ xpcall(function()
 		'BrickColor',
 		'Orientation',
 		'Position',
+		"WorldCFrame",
+		"WorldPosition",
 		'WorldPivot',
 		"Grip",
 		"Origin",
@@ -152,10 +154,6 @@ xpcall(function()
 
 	local DontSaveIf = {
 		Rotation = {'CFrame'},
-		WorldAxis = {'CFrame'},
-		WorldPosition = {'CFrame'},
-		WorldCFrame = {'CFrame'},
-		WorldOrientation = {'CFrame'}
 	}
 
 	local ValueTypeRenames = {
