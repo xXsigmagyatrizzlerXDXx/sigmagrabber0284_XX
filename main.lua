@@ -137,19 +137,19 @@ xpcall(function()
 	}
 	
 	local DontSave = {
-		'Parent',
-		'BrickColor',
-		'Orientation',
-		'Position',
-		"WorldCFrame",
-		"WorldPosition",
-		'WorldPivot',
-		"Grip",
-		"Origin",
-		"PrimaryPart",
-		"UniqueId",
-		"PivotOffset";
-		"Pivot Offset";
+		{'Parent'},
+		{'BrickColor'},
+		{'Orientation', {"ParticleEmitter"}},
+		{'Position'},
+		{"WorldCFrame"},
+		{"WorldPosition"},
+		{'WorldPivot'},
+		{"Grip"},
+		{"Origin"},
+		{"PrimaryPart"},
+		{"UniqueId"},
+		{"PivotOffset"};
+		{"Pivot Offset"};
 	}
 
 	local DontSaveIf = {
@@ -161,8 +161,19 @@ xpcall(function()
 	}
 
 
-	local function ShouldntSave(properties, property)
-		if not DontSaveIf[property] or table.find(DontSave, property) then return table.find(DontSave, property) end
+	local function ShouldntSave(properties, property, objectClass)
+		local disallow = false
+		
+		for _, disallowedproperty in DontSave do
+			if disallowedproperty[1] == property then
+				if not table.find(DontSave, objectClass) then
+					disallow = true
+					break
+				end
+			end
+		end
+		
+		if not DontSaveIf[property] or disallow then return table.find(DontSave, property) end
 
 		for i, prop in pairs(DontSaveIf[property])do
 			if properties[prop] then
@@ -316,7 +327,7 @@ xpcall(function()
 
 		for i, property in pairs(properties)do
 			property = property.Name
-			if (defaults[property] ~= nil and Object[property] == defaults[property]) or ShouldntSave(data, property) then continue end
+			if (defaults[property] ~= nil and Object[property] == defaults[property]) or ShouldntSave(data, property, Object.ClassName) then continue end
 			if property == "Scale" and Object.ClassName == "Model" then continue end
 			if typeof(data[property]) == "Instance" or (Object:IsA("Model") and property == "CFrame") then continue end
 
