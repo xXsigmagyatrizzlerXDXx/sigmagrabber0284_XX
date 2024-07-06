@@ -137,19 +137,19 @@ xpcall(function()
 	}
 	
 	local DontSave = {
-		{'Parent', {}},
-		{'BrickColor', {}},
-		{'Orientation', {"ParticleEmitter"}},
-		{'Position', {}},
-		{"WorldCFrame", {}},
-		{"WorldPosition", {}},
-		{'WorldPivot', {}},
-		{"Grip", {}},
-		{"Origin", {}},
-		{"PrimaryPart", {}},
-		{"UniqueId", {}},
-		{"PivotOffset", {}};
-		{"Pivot Offset", {}};
+		['Parent'] = {},
+		['BrickColor'] = {},
+		['Orientation'] = {"ParticleEmitter"},
+		['Position'] = {},
+		["WorldCFrame"] = {},
+		["WorldPosition"] = {},
+		['WorldPivot'] = {},
+		["Grip"] = {},
+		["Origin"] = {},
+		["PrimaryPart"] = {},
+		["UniqueId"] = {},
+		["PivotOffset"] = {};
+		["Pivot Offset"] = {};
 	}
 
 	local DontSaveIf = {
@@ -164,16 +164,11 @@ xpcall(function()
 	local function ShouldntSave(properties, property, objectClass)
 		local disallow = false
 		
-		for _, disallowedproperty in DontSave do
-			if disallowedproperty[1] == property then
-				if #disallowedproperty > 1 and not table.find(disallowedproperty[2], objectClass) then
-					disallow = true
-					break
-				end
-			end
+		if DontSave[property] then
+			disallow = not table.find(DontSave[property], objectClass)
 		end
 		
-		if not DontSaveIf[property] or disallow then return false end
+		if not DontSaveIf[property] or disallow then return disallow end
 
 		for i, prop in pairs(DontSaveIf[property])do
 			if properties[prop] then
