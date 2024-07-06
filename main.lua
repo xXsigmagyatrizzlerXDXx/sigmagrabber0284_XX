@@ -137,19 +137,19 @@ xpcall(function()
 	}
 	
 	local DontSave = {
-		{'Parent'},
-		{'BrickColor'},
+		{'Parent', {}},
+		{'BrickColor', {}},
 		{'Orientation', {"ParticleEmitter"}},
-		{'Position'},
-		{"WorldCFrame"},
-		{"WorldPosition"},
-		{'WorldPivot'},
-		{"Grip"},
-		{"Origin"},
-		{"PrimaryPart"},
-		{"UniqueId"},
-		{"PivotOffset"};
-		{"Pivot Offset"};
+		{'Position', {}},
+		{"WorldCFrame", {}},
+		{"WorldPosition", {}},
+		{'WorldPivot', {}},
+		{"Grip", {}},
+		{"Origin", {}},
+		{"PrimaryPart", {}},
+		{"UniqueId", {}},
+		{"PivotOffset", {}};
+		{"Pivot Offset", {}};
 	}
 
 	local DontSaveIf = {
@@ -166,7 +166,7 @@ xpcall(function()
 		
 		for _, disallowedproperty in DontSave do
 			if disallowedproperty[1] == property then
-				if not table.find(DontSave, objectClass) then
+				if #disallowedproperty > 1 and not table.find(disallowedproperty[2], objectClass) then
 					disallow = true
 					break
 				end
