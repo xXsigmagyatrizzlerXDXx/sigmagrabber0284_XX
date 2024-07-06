@@ -80,7 +80,13 @@ xpcall(function()
 		".deepknight", 
 		".dukecultist", 
 		".brainsuckerduke", 
-		".thief"
+		".thief",
+		".hive_scout",
+		".summer_thug",
+		".special_thug",
+		".gremor_nomad_leader",
+		".fighter_union",
+		".brainsucker"
 	}
 	
 	local CloneDetectionClasses = {
@@ -504,6 +510,16 @@ xpcall(function()
 					
 					if IsAMob then return end
 				end
+				
+				if Object:FindFirstChildOfClass("Humanoid") then
+					SaveAnimations(Object)
+					
+					for _, Track in Object:FindFirstChildOfClass("Humanoid"):GetPlayingAnimationTracks() do
+						pcall(function()
+							Track:Stop()
+						end)
+					end
+				end
 			end
 			
 			if DupeRemovalEnabled then
@@ -544,10 +560,6 @@ xpcall(function()
 				Sound:Stop()
  			else
 				Object:Clone().Parent = Location
-			end
-
-			if Object.ClassName == "Humanoid" then
-				SaveAnimations(Object.Parent)
 			end
 
 			print(`ADDED INSTANCE {Object.Name}:{Object.ClassName}`)
