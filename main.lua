@@ -68,7 +68,7 @@ xpcall(function()
 
 	local IgnorableObjects = {"WindTrail", "NewDirt", "WaterImpact", "Footprint", "Part"}
 	local UnnededClasses = {"Script", "ModuleScript", "LocalScript", "SpecialMesh", "CylinderMesh", "UnionOperation"}
-	
+
 	local MobNames = {
 		".bountyhunter", 
 		".golem", 
@@ -88,7 +88,7 @@ xpcall(function()
 		".fighter_union",
 		".brainsucker"
 	}
-	
+
 	local CloneDetectionClasses = {
 		["Sound"] = {
 			"SoundId";
@@ -101,7 +101,7 @@ xpcall(function()
 			"Material";
 			"Transparency";
 		};
-		
+
 		["Highlight"] = {
 			"FillColor";
 			"OutlineColor";
@@ -135,7 +135,7 @@ xpcall(function()
 			"Value";
 		};
 	}
-	
+
 	local DontSave = {
 		['Parent'] = {},
 		['BrickColor'] = {},
@@ -163,11 +163,11 @@ xpcall(function()
 
 	local function ShouldntSave(properties, property, objectClass)
 		local disallow = false
-		
+
 		if DontSave[property] then
 			disallow = not table.find(DontSave[property], objectClass)
 		end
-		
+
 		if not DontSaveIf[property] or disallow then 
 			return disallow
 		end
@@ -289,7 +289,7 @@ xpcall(function()
 			NewString, Count = string.gsub(NewString, "`", "")
 			NewString, Count = string.gsub(NewString, "'", "")
 			NewString, Count = string.gsub(NewString, '"', "")
-			
+
 			Data = NewString
 		else
 			Data = Value
@@ -350,7 +350,7 @@ xpcall(function()
 				data.Children = nil
 			end
 		end
-
+		
 		return data
 	end
 
@@ -362,17 +362,17 @@ xpcall(function()
 
 	local function SaveObjectToFile(Object, Name)
 		local Data; 
-		
+
 		xpcall(function()
 			Notify("CONVERTING DATA", "Refrain from doing any action.", 5)
-			
+
 			local Data = tostring(Converter:ConvertToSaveable(Object, true))
-			
+
 			xpcall(function()
 				Notify("DATA CONVERTED", "Refrain from doing any action.", 5)
-				
+
 				writefile(`{Name}.txt`, Data)
-				
+
 				Notify("FILE SAVED", `You can find the save at "workspace/{Name}", you can resume now.`, 5)
 			end, function(err)
 				Notify("FAILED TO SAVE OBJECT", tostring(err), 5)
@@ -381,7 +381,7 @@ xpcall(function()
 			Notify("FAILED TO CONVERT OBJECT", tostring(err), 5)
 		end)
 	end
-	
+
 	Notify("API INITIALIZED", "Beginning next step", 2)
 
 	getgenv()["SessionId"] = getgenv()["SessionId"] or HTTPService:GenerateGUID(false)
@@ -396,7 +396,7 @@ xpcall(function()
 	getgenv()["Connections"] = {}
 	getgenv()["SaveCount"] = getgenv()["SaveCount"] or 0
 	getgenv()["CharacterSaves"] = getgenv()["CharacterSaves"] or 0
-	
+
 	if getgenv()["Folder"] then
 		getgenv().Folder:Destroy()
 	end
@@ -437,7 +437,7 @@ xpcall(function()
 
 	local CharacterSearchEnabled, ThrownSearchEnabled = true, true;
 	local DupeRemovalEnabled, MobRemovalEnabled = true, true;
-	
+
 	local function SaveAnimations(Target)
 		xpcall(function()
 			if AnimationsFolder and Target ~= nil and Target:FindFirstChildOfClass("Humanoid") then
@@ -457,41 +457,41 @@ xpcall(function()
 			warn(`RANDOM ANIMATON SAVING ERROR: {err}`)
 		end)
 	end
-	
+
 	local function AnyObjectWithPropertysLike(Class, SecondaryObject, PropertiesToCheck, Location)
 		local Result = false
-		
+
 		xpcall(function()
 			for _, Object in Location:GetDescendants() do
 				if Object:IsA(Class) then
 					local SameOnes = 0
-					
+
 					for _, PropertyName in PropertiesToCheck do
 						if Object[PropertyName] == SecondaryObject[PropertyName] then
 							SameOnes += 1
 						end
 					end
-					
+
 					if SameOnes >= #PropertiesToCheck then
 						Result = true
-						
+
 						break
 					end
 				end
 			end
-			
+
 			return Result
 		end, function(err)
 			warn(`FAILED TO CHECK IF DUPLICATE OBJECT "{SecondaryObject}:{Class}": {err}`)
 		end)
-		
+
 		return Result
 	end
-	
+
 	local function StoreObject(Object, Location)
 		xpcall(function()
 			if Object == nil or (Object ~= nil and Object.Parent == nil) then return end
-			
+
 			if table.find(IgnorableObjects, Object.Name) or table.find(UnnededClasses, Object.ClassName) then return end
 
 			local OriginalParent = Object.Parent
@@ -501,38 +501,38 @@ xpcall(function()
 			if Object == nil or (Object ~= nil and Object.Parent ~= nil and Object.Parent ~= OriginalParent) then return end
 			if Object.ClassName == "Model" then 
 				if #Object:GetChildren() <= 0 then return end
-				
+
 				if MobRemovalEnabled then
 					local IsAMob = false
-					
+
 					for _, MobName in MobNames do
 						local FindOperation = string.find(Object.Name, MobName)
-						
+
 						if FindOperation ~= nil and tonumber(FindOperation) ~= nil and (FindOperation <= 1 or FindOperation == string.len(MobName)) then
 							IsAMob = true
 							break
 						end
 					end
-					
+
 					if IsAMob then return end
 				end
-				
+
 				if Object:FindFirstChildOfClass("Humanoid") then
 					SaveAnimations(Object)
-					
+
 					for _, Track in Object:FindFirstChildOfClass("Humanoid"):GetPlayingAnimationTracks() do
 						pcall(function()
 							Track:Stop(0)
 						end)
 					end
-					
+
 					task.wait(0.1)
 				end
 			end
-			
+
 			if DupeRemovalEnabled then
 				local Proceed = true
-				
+
 				for Class, CloneData in CloneDetectionClasses do
 					if Object:IsA(Class) then
 						if AnyObjectWithPropertysLike(Class, Object, CloneData, Location) then
@@ -541,13 +541,13 @@ xpcall(function()
 						end
 					end
 				end
-				
+
 				if not Proceed then
 					warn(`PREVENTED DUPLICATE INSTANCE: "{Object.Name}:{Object.ClassName}"`)
 					return
 				end
 			end
-			
+
 			if Object.ClassName == "Attachment" then
 				local Part = Instance.new("Part", Location)
 				Part.Name = `{Object.Name}_ATTACHMENT_HOLDER`
@@ -558,7 +558,7 @@ xpcall(function()
 				Part.CanTouch = false
 				Part.CanQuery = false
 				Part.Size = Vector3.new(1, 1, 1)
-				
+
 				local Attachment = Object:Clone()
 				Attachment.Parent = Part
 				Attachment.CFrame = CFrame.new()
@@ -566,7 +566,7 @@ xpcall(function()
 				local Sound = Object:Clone()
 				Sound.Parent = Location
 				Sound:Stop()
- 			else
+			else
 				Object:Clone().Parent = Location
 			end
 
@@ -689,13 +689,19 @@ xpcall(function()
 					end
 				end
 				
+				TargettingCharacter.Archivable = true
+				
+				for _, Object in TargettingCharacter:GetDescendants() do
+					Object.Archivable = true
+				end
+
 				task.wait(0.1)
-				
+
 				SaveObjectToFile(TargettingCharacter, `CHARSAVE_{TargettingCharacter.Name}_{getgenv()["CharacterSaves"]}`)
-				
+
 				getgenv()["CharacterSaves"] = getgenv()["CharacterSaves"] + 1
 			end
-			
+
 			Notify("STORED", `Successfully stored target character!`)
 		end;
 
@@ -730,13 +736,13 @@ xpcall(function()
 
 			Notify("DUPE FILTERING TOGGLED", `State: {DupeRemovalEnabled}`)
 		end;
-		
+
 		["mobtoggle"] = function(args)
 			MobRemovalEnabled = not MobRemovalEnabled
 
 			Notify("DUPE FILTERING TOGGLED", `State: {DupeRemovalEnabled}`)
 		end;
-		
+
 		["chartoggle"] = function(args)
 			CharacterSearchEnabled = not CharacterSearchEnabled
 
@@ -773,7 +779,7 @@ xpcall(function()
 			SaveAnimations(TargettingCharacter)
 		elseif IO.KeyCode == Enum.KeyCode.M then
 			Notify("SAVING INSTANCE", "This could take a while depending on what your saving, refrain from doing any actions.", 5)
-			
+
 			xpcall(function()
 				SaveObjectToFile(Folder, `SAVE_{getgenv()["SaveCount"]}`)
 
@@ -836,7 +842,7 @@ xpcall(function()
 
 	Connect("CommandDetectionOldChat", Player.Chatted:Connect(function(Msg, Recipient)
 		if Recipient then return end
-		
+
 		ChattedConnection(Msg)
 	end))
 
