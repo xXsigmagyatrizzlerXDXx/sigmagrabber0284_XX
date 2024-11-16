@@ -286,8 +286,10 @@ xpcall(function()
 			--Data.Value = Converter:ConvertToTable(Value)
 		elseif Type == 'CFrame' then
 			Data = {Value:GetComponents()}
-		elseif Type == 'Vector3' or Type == 'Vector2' then
-			Data = {Value.X, Value.Y, Type == 'Vector3' and Value.Z}
+		elseif Type == 'Vector2' then
+			Data = {Value.X, Value.Y}
+		elseif Type == "Vector3" then
+			Data = {Value.X, Value.Y, Value.Z}
 		elseif Type == 'UDim2' then
 			Data = {Value.X.Scale, Value.X.Offset, Value.Y.Scale, Value.Y.Offset}
 		elseif Type == 'UDim' then
