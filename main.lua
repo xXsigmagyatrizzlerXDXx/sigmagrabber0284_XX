@@ -151,7 +151,7 @@ xpcall(function()
 		['Parent'] = {},
 		['BrickColor'] = {},
 		['Orientation'] = {"ParticleEmitter"},
-		['Position'] = {},
+		['Position'] = {"GuiBase"},
 		["WorldCFrame"] = {},
 		["WorldPosition"] = {},
 		['WorldPivot'] = {},
@@ -181,11 +181,15 @@ xpcall(function()
 	}
 
 
-	local function ShouldntSave(properties, property, objectClass)
+	local function ShouldntSave(properties, property, objectClass, OBJECT)
 		local disallow = false
 
 		if DontSave[property] then
 			disallow = not table.find(DontSave[property], objectClass)
+			
+			if table.find(DontSave[property], "GuiBase") then
+				disallow = not OBJECT:IsA("GuiBase")
+			end
 		end
 
 		if not DontSaveIf[property] or disallow then 
@@ -369,7 +373,7 @@ xpcall(function()
 
 		for i, property in pairs(properties)do
 			property = property.Name
-			if (defaults[property] ~= nil and Object[property] == defaults[property]) or ShouldntSave(data, property, DesiredClass) then continue end
+			if (defaults[property] ~= nil and Object[property] == defaults[property]) or ShouldntSave(data, property, DesiredClass, Object) then continue end
 			if property == "Scale" then continue end
 			if typeof(data[property]) == "Instance" or (DesiredClass == "Model" and property == "CFrame") then continue end
 
