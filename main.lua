@@ -28,7 +28,8 @@ xpcall(function()
 	local UIS = game:GetService("UserInputService")
 	local MaterialService = game:GetService("MaterialService")
 	local TextChatService = game:GetService("TextChatService")
-
+	local StarterGui = game:GetService("StarterGui")
+	
 	local Player = Players.LocalPlayer
 
 	Notify("INITIALIZING API", "Beginning initialization of API")
@@ -49,6 +50,8 @@ xpcall(function()
 		Defaults = {},
 		Properties = {}
 	}
+	
+	local ChatDB = false
 
 	local function IsDeprecated(Property)
 		if not Property.Tags then return end
@@ -67,8 +70,9 @@ xpcall(function()
 	}
 
 	local IgnorableObjects = {"WindTrail", "NewDirt", "WaterImpact", "Footprint", "Part"}
-	local UnnededClasses = {"Script", "ModuleScript", "LocalScript", "SpecialMesh", "CylinderMesh", "UnionOperation"}
-
+	local UnnededClasses = {"SpecialMesh", "CylinderMesh", "UnionOperation"}
+	local ClassesToConvertToFolders = {"ModuleScript", "Script", "LocalScript", "StarterGui", "PlayerGui", "Backpack", "MaterialService", "Lighting"}
+	
 	local MobNames = {
 		".bountyhunter", 
 		".golem", 
@@ -303,15 +307,27 @@ xpcall(function()
 
 		if not Parent then Parent = Object end
 		if not IncludeDescendants then IncludeDescendants = false end
+		
+		Object.Archivable = true
 
-		local properties = PropertiesAPI:GetProperties(Object.ClassName)
-		local defaults = PropertiesAPI:GetDefaults(Object.ClassName)
+		for _, Object__ in Object:GetDescendants() do
+			Object__.Archivable = true
+		end
+		
+		local DesiredClass = Object.ClassName
+		
+		if table.find(ClassesToConvertToFolders, Object.ClassName) then
+			DesiredClass = "Folder"
+		end
+		
+		local properties = PropertiesAPI:GetProperties(DesiredClass)
+		local defaults = PropertiesAPI:GetDefaults(DesiredClass)
 		local data = {
-			ClassName = Object.ClassName,
+			ClassName = DesiredClass,
 			ID = Object:GetAttribute('GUID')
 		}
-
-		if Object:IsA('Script') or ((Object:IsA('Model') or Object:IsA('Folder')) and #Object:GetChildren() <= 0) then
+		
+		if ((Object:IsA('Model') or Object:IsA('Folder')) and #Object:GetChildren() <= 0) then
 			return
 		end
 
@@ -324,9 +340,9 @@ xpcall(function()
 
 		for i, property in pairs(properties)do
 			property = property.Name
-			if (defaults[property] ~= nil and Object[property] == defaults[property]) or ShouldntSave(data, property, Object.ClassName) then continue end
-			if property == "Scale" and Object.ClassName == "Model" then continue end
-			if typeof(data[property]) == "Instance" or (Object:IsA("Model") and property == "CFrame") then continue end
+			if (defaults[property] ~= nil and Object[property] == defaults[property]) or ShouldntSave(data, property, DesiredClass) then continue end
+			if property == "Scale" then continue end
+			if typeof(data[property]) == "Instance" or (DesiredClass == "Model" and property == "CFrame") then continue end
 
 			xpcall(function()
 				data[property] = { 
@@ -350,7 +366,7 @@ xpcall(function()
 				data.Children = nil
 			end
 		end
-		
+
 		return data
 	end
 
@@ -396,7 +412,9 @@ xpcall(function()
 	getgenv()["Connections"] = {}
 	getgenv()["SaveCount"] = getgenv()["SaveCount"] or 0
 	getgenv()["CharacterSaves"] = getgenv()["CharacterSaves"] or 0
-
+	getgenv()["UISaves"] = getgenv()["UISaves"] or 0
+	getgenv()["StarterUISaves"] = getgenv()["StarterUISaves"] or 0
+	
 	if getgenv()["Folder"] then
 		getgenv().Folder:Destroy()
 	end
@@ -429,6 +447,9 @@ xpcall(function()
 
 	local PlayerSpecificStorage = Instance.new("Folder", Folder)
 	PlayerSpecificStorage.Name = "PlayerSpecific"
+	
+	local TemporaryStorage = Instance.new("Folder", Folder)
+	TemporaryStorage.Name = "Temporary"
 
 	getgenv()["Folder"] = Folder
 
@@ -440,8 +461,10 @@ xpcall(function()
 
 	local function SaveAnimations(Target)
 		xpcall(function()
-			if AnimationsFolder and Target ~= nil and Target:FindFirstChildOfClass("Humanoid") then
-				for _, Track in next, Target:FindFirstChildOfClass("Humanoid"):GetPlayingAnimationTracks() do 
+			local AnimationHandler = Target:FindFirstChildOfClass("Humanoid") or Target:FindFirstChildOfClass("AnimationController") or Target:FindFirstChildOfClass("Animator")
+
+			if AnimationsFolder and Target ~= nil and AnimationHandler then
+				for _, Track in next, AnimationHandler:GetPlayingAnimationTracks() do 
 					local Id = Track.Animation.AnimationId
 
 					if AnimationsFolder:FindFirstChild(Id) then continue end
@@ -516,17 +539,19 @@ xpcall(function()
 
 					if IsAMob then return end
 				end
-
-				if Object:FindFirstChildOfClass("Humanoid") then
+				
+				local AnimationHandler = Object:FindFirstChildOfClass("Humanoid") or Object:FindFirstChildOfClass("AnimationController") or Object:FindFirstChildOfClass("Animator")
+				
+				if AnimationHandler then
 					SaveAnimations(Object)
-
-					for _, Track in Object:FindFirstChildOfClass("Humanoid"):GetPlayingAnimationTracks() do
+					
+					for _, Track in next, AnimationHandler:GetPlayingAnimationTracks() do
 						pcall(function()
 							Track:Stop(0)
 						end)
 					end
 
-					task.wait(0.1)
+					task.wait(0.05)
 				end
 			end
 
@@ -550,7 +575,7 @@ xpcall(function()
 
 			if Object.ClassName == "Attachment" then
 				local Part = Instance.new("Part", Location)
-				Part.Name = `{Object.Name}_ATTACHMENT_HOLDER`
+				Part.Name = `{Object.Name}`
 				Part.Anchored = true
 				Part.CFrame = Object.WorldCFrame
 				Part.Transparency = 1
@@ -688,9 +713,9 @@ xpcall(function()
 						end)
 					end
 				end
-				
+
 				TargettingCharacter.Archivable = true
-				
+
 				for _, Object in TargettingCharacter:GetDescendants() do
 					Object.Archivable = true
 				end
@@ -703,6 +728,26 @@ xpcall(function()
 			end
 
 			Notify("STORED", `Successfully stored target character!`)
+		end;
+		
+		["storestartergui"] = function(args)
+			Notify("SAVING...", `Storing StaterGui could take a while. DONT DO ANY OTHER ACTIONS.`)
+			
+			getgenv()["StarterUISaves"] = getgenv()["StarterUISaves"] + 1
+			
+			SaveObjectToFile(StarterGui, `STARTERGUISAVE_{getgenv()["StarterUISaves"]}`)
+			
+			Notify("STORED", `Successfully stored StarterGui.`)
+		end;
+		
+		["storegui"] = function(args)
+			Notify("SAVING...", `Storing PlayerGui could take a while. DONT DO ANY OTHER ACTIONS.`)
+
+			getgenv()["UISaves"] = getgenv()["UISaves"] + 1
+			
+			SaveObjectToFile(Player.PlayerGui, `PLAYERGUISAVE_{getgenv()["UISaves"]}`)
+
+			Notify("STORED", `Successfully stored PlayerGui.`)
 		end;
 
 		["storerep"] = function(args)
@@ -842,8 +887,15 @@ xpcall(function()
 
 	Connect("CommandDetectionOldChat", Player.Chatted:Connect(function(Msg, Recipient)
 		if Recipient then return end
-
+		if ChatDB then return end
+		
+		ChatDB = true
+		
 		ChattedConnection(Msg)
+		
+		wait(0.1)
+		
+		ChatDB = false
 	end))
 
 	Notify("INITIALIZED ALL", "The asset grabber was initialized successfully")
