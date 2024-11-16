@@ -889,11 +889,11 @@ xpcall(function()
 		
 		ChatDB = true
 		
+		delay(0.1, function()
+			ChatDB = false
+		end)
+		
 		ChattedConnection(Msg)
-		
-		wait(0.1)
-		
-		ChatDB = false
 	end))
 
 	Notify("INITIALIZED ALL", "The asset grabber was initialized successfully")
