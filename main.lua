@@ -1,12 +1,16 @@
 local StarterGui = game:GetService("StarterGui")
 
---local table_ = {}
+local table_ = {}
 
---function getgenv()
---	return table_
---end
+function getgenv()
+	return table_
+end
 
---wait(5)
+function writefile(name, contents)
+	print(name, contents)
+end
+
+wait(5)
 
 local function Notify(Title, Text, Duration)
 	xpcall(function()
@@ -72,6 +76,7 @@ xpcall(function()
 	local IgnorableObjects = {"WindTrail", "NewDirt", "WaterImpact", "Footprint", "Part"}
 	local UnnededClasses = {"SpecialMesh", "CylinderMesh", "UnionOperation"}
 	local ClassesToConvertToFolders = {"ModuleScript", "Script", "LocalScript", "StarterGui", "PlayerGui", "Backpack", "MaterialService", "Lighting"}
+	local GlobalIgnorableNames = {"Chat", "BubbleChat", "Freecam"}
 	
 	local MobNames = {
 		".bountyhunter", 
@@ -154,6 +159,15 @@ xpcall(function()
 		["UniqueId"] = {},
 		["PivotOffset"] = {};
 		["Pivot Offset"] = {};
+		["FontFace"] = {};
+		["NextSelectionUp"] = {};
+		["NextSelectionDown"] = {};
+		["NextSelectionLeft"] = {};
+		["NextSelectionRight"] = {};
+		["RootLocalizationTable"] = {};
+		["AbsolutePosition"] = {};
+		["AbsoluteRotation"] = {};
+		["AbsoluteSize"] = {};
 	}
 
 	local DontSaveIf = {
@@ -191,8 +205,8 @@ xpcall(function()
 		Properties = {};
 	}
 
-	PropertiesAPI.Dump = HTTPService:JSONDecode(game:HttpGet('https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json', true))
-	--PropertiesAPI.Dump = HTTPService:JSONDecode(require(script:WaitForChild("api")))
+	--PropertiesAPI.Dump = HTTPService:JSONDecode(game:HttpGet('https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json', true))
+	PropertiesAPI.Dump = HTTPService:JSONDecode(require(script:WaitForChild("api")))
 
 	Notify("CLASSES DOWNLOADED", "Beginning next step", 2)
 
@@ -305,6 +319,7 @@ xpcall(function()
 	function Converter:ConvertToTable(Object, Parent, IncludeDescendants)
 		assert(Object, 'No object was passed through')
 
+		if table.find(GlobalIgnorableNames, Object.Name) then return end
 		if not Parent then Parent = Object end
 		if not IncludeDescendants then IncludeDescendants = false end
 		
@@ -847,7 +862,6 @@ xpcall(function()
 			local ArgsStartIndex = 2
 
 			if CommandName then
-				print(Split[2], Split[3], Split[4], Split[5])
 				if CommandName == "/e" then
 					CommandName = Split[2]
 					ArgsStartIndex = 3
