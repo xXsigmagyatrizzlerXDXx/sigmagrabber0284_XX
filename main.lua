@@ -303,6 +303,8 @@ xpcall(function()
 			Data = {Value.Min, Value.Max}
 		elseif Type == 'EnumItem' then
 			Data = Value.Value
+		elseif Type == "Rect" then
+			Data = {Value.Min.X, Value.Min.Y, Value.Max.X, Value.Max.Y}
 		elseif Type == "string" then
 			local NewString, Count = string.gsub(Value, "\'", "")
 			NewString, Count = string.gsub(NewString, "\"", "")
@@ -483,37 +485,6 @@ xpcall(function()
 		return table.concat(spans, ",").."|"..table.concat(sequence)
 	end
 
-	function Compressor:Decompress(text)
-		local dictionary = copy(self.dictionary)
-		local sequence, spans, content = {}, text:match("(.-)|(.*)")
-		local groups, start = {}, 1
-		for span in spans:gmatch("%d+") do
-			local width = #groups+1
-			groups[width] = content:sub(start, start + span*width - 1)
-			start = start + span*width
-		end
-		local previous;
-		for width = 1, #groups do
-			for value in groups[width]:gmatch(('.'):rep(width)) do
-				local entry = dictionary[tobase10(value)]
-				if previous then
-					if entry then
-						sequence[#sequence+1] = entry
-						dictionary[#dictionary+1] = previous..entry:sub(1, 1)
-					else
-						entry = previous..previous:sub(1, 1)
-						sequence[#sequence+1] = entry
-						dictionary[#dictionary+1] = entry
-					end
-				else
-					sequence[1] = entry
-				end
-				previous = entry
-			end
-		end
-		return unescape(table.concat(sequence))
-	end
-	
 	function Converter:ConvertToSaveable(Object : Instance, IncludeDescendants:boolean)
 		local data = Converter:ConvertToTable(Object, nil, IncludeDescendants)
 
