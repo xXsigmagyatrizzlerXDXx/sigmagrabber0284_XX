@@ -1,5 +1,6 @@
 local StarterGui = game:GetService("StarterGui")
 
+--[[
 local table_ = {}
 
 function getgenv()
@@ -11,6 +12,7 @@ function writefile(name, contents)
 end
 
 wait(5)
+]]
 
 local function Notify(Title, Text, Duration)
 	xpcall(function()
@@ -205,8 +207,8 @@ xpcall(function()
 		Properties = {};
 	}
 
-	--PropertiesAPI.Dump = HTTPService:JSONDecode(game:HttpGet('https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json', true))
-	PropertiesAPI.Dump = HTTPService:JSONDecode(require(script:WaitForChild("api")))
+	PropertiesAPI.Dump = HTTPService:JSONDecode(game:HttpGet('https://raw.githubusercontent.com/CloneTrooper1019/Roblox-Client-Tracker/roblox/API-Dump.json', true))
+	--PropertiesAPI.Dump = HTTPService:JSONDecode(require(script:WaitForChild("api")))
 
 	Notify("CLASSES DOWNLOADED", "Beginning next step", 2)
 
