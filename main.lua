@@ -908,10 +908,16 @@ xpcall(function()
 
 		StoreObject(Child, ThrownStorage)
 	end))
-
+	
+	local ChatCounter = 0
+	
 	Connect("CommandDetectionOldChat", Player.Chatted:Connect(function(Msg, Recipient)
 		if Recipient then return end
 		if ChatDB then return end
+		
+		ChatCounter += 1
+		
+		if ChatCounter % 2 ~= 0 then return end
 		
 		ChatDB = true
 		
