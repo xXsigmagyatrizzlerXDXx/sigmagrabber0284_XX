@@ -312,21 +312,14 @@ xpcall(function()
 		elseif Type == "Rect" then
 			Data = {Value.Min.X, Value.Min.Y, Value.Max.X, Value.Max.Y}
 		elseif Type == "string" then
+			--[[
 			local NewString, Count = string.gsub(Value, "\'", "")
 			NewString, Count = string.gsub(NewString, "\"", "")
 			NewString, Count = string.gsub(NewString, "`", "")
 			NewString, Count = string.gsub(NewString, "'", "")
 			NewString, Count = string.gsub(NewString, '"', "")
-			
-			local Splits = string.split(NewString, "\n")
-			
-			if #Splits > 1 then
-				NewString = ""
-				
-				for Index, SplitText in next, Splits do
-					NewString = `{NewString}\n{SplitText}`
-				end
-			end
+			NewString, Count = string.gsub(NewString, '\n', "")
+			]]
 			
 			Data = NewString
 		else
