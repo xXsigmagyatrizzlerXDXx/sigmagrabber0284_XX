@@ -309,7 +309,17 @@ xpcall(function()
 			NewString, Count = string.gsub(NewString, "`", "")
 			NewString, Count = string.gsub(NewString, "'", "")
 			NewString, Count = string.gsub(NewString, '"', "")
-
+			
+			local Splits = string.split(NewString, "\n")
+			
+			if #Splits >= 1 then
+				NewString = ""
+				
+				for Index, SplitText in next, Splits do
+					NewString = `{NewString}\n{SplitText}`
+				end
+			end
+			
 			Data = NewString
 		else
 			Data = Value
