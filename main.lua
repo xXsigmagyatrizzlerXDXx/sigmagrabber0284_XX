@@ -291,7 +291,7 @@ xpcall(function()
 		elseif Type == 'UDim2' then
 			Data = {Value.X.Scale, Value.X.Offset, Value.Y.Scale, Value.Y.Offset}
 		elseif Type == 'UDim' then
-			Data = {Value.X, Value.Y}
+			Data = {Value.Scale, Value.Offset}
 		elseif Type == 'ColorSequence' or Type == 'NumberSequence' then
 			Data = {}
 
