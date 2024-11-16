@@ -312,7 +312,7 @@ xpcall(function()
 			
 			local Splits = string.split(NewString, "\n")
 			
-			if #Splits >= 1 then
+			if #Splits > 1 then
 				NewString = ""
 				
 				for Index, SplitText in next, Splits do
