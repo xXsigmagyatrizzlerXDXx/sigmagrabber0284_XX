@@ -473,8 +473,6 @@ xpcall(function()
 					Value.Name = Id
 					Value.Value = Id
 				end
-			else
-				Notify("CANNOT SAVE", `No character selected, or character is loading or no humanoid is present.`)
 			end
 		end, function(err)
 			warn(`RANDOM ANIMATON SAVING ERROR: {err}`)
