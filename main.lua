@@ -279,7 +279,7 @@ xpcall(function()
 
 	function Converter:ToValue(Parent, Value)
 		local Type = typeof(Value)
-		local Data
+		local Data = nil
 
 		if (Type == 'Instance') and (Value:IsDescendantOf(Parent) or Value == Parent) then
 			Data = Value:GetAttribute('GUID')
@@ -321,7 +321,7 @@ xpcall(function()
 			NewString, Count = string.gsub(NewString, '\n', "")
 			]]
 			
-			Data = NewString
+			Data = Value
 		else
 			Data = Value
 		end
@@ -447,14 +447,6 @@ xpcall(function()
 		return value
 	end
 
-	local function tobase10(value)
-		local n = 0
-		for i = 1, #value do
-			n = n + 93^(i-1)*Compressor.dictionary[value:sub(-i, -i)]
-		end
-		return n
-	end
-	
 	function Compressor:Compress(text)
 		local dictionary = copy(self.dictionary)
 		local key, sequence, size = "", {}, #dictionary
